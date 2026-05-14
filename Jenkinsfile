@@ -9,7 +9,8 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t devops-dashboard ./docker'
+                // IMPORTANT: build from project root
+                sh 'docker build -t devops-dashboard .'
             }
         }
 
@@ -26,6 +27,7 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
+
                     sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
                 }
             }
@@ -47,15 +49,15 @@ pipeline {
     post {
 
         success {
-            echo "✅ Pipeline SUCCESS: Build, Push, and Deploy completed successfully!"
+            echo "✅ SUCCESS: Pipeline completed (Build + Push + Deploy)"
         }
 
         failure {
-            echo "❌ Pipeline FAILED: Something went wrong during CI/CD process!"
+            echo "❌ FAILED: Something went wrong in CI/CD pipeline"
         }
 
         always {
-            echo "🔄 Pipeline finished (success or failure). Cleaning up if needed..."
+            echo "🔄 Pipeline finished"
         }
     }
 }
