@@ -7,10 +7,16 @@ pipeline {
 
     stages {
 
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
-                // IMPORTANT: dockerfile is inside ./docker
-                sh 'docker build -t devops-dashboard ./docker'
+                // IMPORTANT: build from project root
+                sh 'docker build -t devops-dashboard .'
             }
         }
 
@@ -27,6 +33,7 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
+
                     sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
                 }
             }
@@ -38,7 +45,7 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy with Ansible') {
             steps {
                 sh 'ansible-playbook -i ansible/inventory.ini ansible/playbook.yml'
             }
@@ -48,15 +55,15 @@ pipeline {
     post {
 
         success {
-            echo "✅ SUCCESS: Pipeline completed (Build + Push + Deploy)"
+            echo "✅ SUCCESS: CI/CD Pipeline completed successfully!"
         }
 
         failure {
-            echo "❌ FAILED: Something went wrong in CI/CD pipeline"
+            echo "❌ FAILED: CI/CD Pipeline broke. Check logs!"
         }
 
         always {
-            echo "🔄 Pipeline finished"
+            echo "🔄 Pipeline finished (cleanup or logging step)"
         }
     }
 }
