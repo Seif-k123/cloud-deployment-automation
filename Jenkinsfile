@@ -9,8 +9,8 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                // IMPORTANT: build from project root
-                sh 'docker build -t devops-dashboard .'
+                // IMPORTANT: dockerfile is inside ./docker
+                sh 'docker build -t devops-dashboard ./docker'
             }
         }
 
@@ -27,7 +27,6 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-
                     sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
                 }
             }
