@@ -1,0 +1,45 @@
+- name: Deploy DevOps Dashboard
+  hosts: web
+  become: yes
+
+  vars:
+    image_name: seifkhaled123/devops-dashboard
+    container_name: devops-dashboard
+    app_port: 8081
+    container_port: 80
+
+  tasks:
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Pull Docker image
+      command: docker pull {{ image_name }}
+
+    - name: Stop existing container (if exists)
+      command: docker stop {{ container_name }}
+      ignore_errors: yes
+
+    - name: Remove existing container (if exists)
+      command: docker rm {{ container_name }}
+      ignore_errors: yes
+
+    - name: Run container
+      command: >
+        docker run -d
+        --name {{ container_name }}
+        -p {{ app_port }}:{{ container_port }}
+        --restart always
+        {{ image_name }}
